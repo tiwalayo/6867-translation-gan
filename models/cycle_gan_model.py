@@ -3,6 +3,7 @@ import itertools
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
+from util import util
 
 
 class CycleGANModel(BaseModel):
@@ -151,7 +152,7 @@ class CycleGANModel(BaseModel):
 
     def backward_D_C(self):
         """Calculate GAN loss for discriminator D_B"""
-        #self.fake_B_temp = self.fake_B_pool.query(self.fake_B)
+        self.fake_B_temp = self.fake_B_pool.query(self.fake_B)
         self.loss_D_C = self.backward_D_basic(self.netD_C, self.real_C, self.fake_B_temp)
 
     def backward_G(self):
@@ -183,6 +184,14 @@ class CycleGANModel(BaseModel):
         # Backward cycle loss || G_A(G_B(B)) - B||
         self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
         """
+        
+        real_A_im = util.tensor2im(self.real_A)
+        fake_B_im = util.tensor2im(self.fake_B)
+
+        #print(self.rec_A.shape, rec_A_im.shape)
+
+        util.save_image(fake_B_im, "/content/6867-translation-gan/res/fake_B.png", aspect_ratio=1)
+        util.save_image(real_A_im, "/content/6867-translation-gan/res/real_A.png", aspect_ratio=1)
 
         # combined loss and calculate gradients
         self.loss_G = self.loss_G_A
